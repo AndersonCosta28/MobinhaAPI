@@ -1,12 +1,13 @@
 import { DeleteResult, Repository, UpdateResult } from "typeorm";
-import IService from "./IService";
-import { Model } from "./Model";
+import IService from "../types/IService";
+import { ModelBase } from "../types/ModelBase";
+import Usuario from "../usuario/usuario.entity";
 
 
-export default class Service implements IService<Model>{
-  protected repository: Repository<Model>;
+export default class ServiceBase implements IService<ModelBase>{
+  protected repository: Repository<ModelBase | Usuario>;
 
-  async FindAll(): Promise<Model[]> {
+  async FindAll(): Promise<ModelBase[]> {
     try {
       return await this.repository.find();
     } catch (error: any) {
@@ -14,7 +15,7 @@ export default class Service implements IService<Model>{
     }
   }
 
-  async FindOneById(id: number): Promise<Model | null> {
+  async FindOneById(id: number): Promise<ModelBase | null> {
     try {
       const result = await this.repository.findOne({ where: { id } });
       return result;
@@ -23,7 +24,7 @@ export default class Service implements IService<Model>{
     }
   }
 
-  async Create(model: Model): Promise<Model> {
+  async Create(model: ModelBase): Promise<ModelBase> {
     try {
       const modelCreated = this.repository.create(model);
       return await this.repository.save(modelCreated);
@@ -32,8 +33,8 @@ export default class Service implements IService<Model>{
     }
   }
 
-  async Update(id: number, model: Model): Promise<boolean> {
-    const modelFinded: Model | null = await this.FindOneById(id);
+  async Update(id: number, model: ModelBase): Promise<boolean> {
+    const modelFinded: ModelBase | null = await this.FindOneById(id);
     if (!modelFinded != null) throw new Error("Usuário não encontrado");
 
     try {
@@ -46,7 +47,7 @@ export default class Service implements IService<Model>{
   }
 
   async Delete(id: number): Promise<boolean> {
-    const modelFinded: Model | null = await this.FindOneById(id);
+    const modelFinded: ModelBase | null = await this.FindOneById(id);
     if (!modelFinded != null) throw new Error("Usuário não encontrado");
 
     try {

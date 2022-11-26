@@ -1,8 +1,8 @@
-import Controller from "../types/Controller";
+import ControllerBase from "../Base/ControllerBase"; 
 import UsuarioService from "./usuario.service";
 import { Router } from "express";
 
-export default class UsuarioController extends Controller {
+export default class UsuarioController extends ControllerBase {
   constructor(service: UsuarioService) {
     super();
     this.service = service;

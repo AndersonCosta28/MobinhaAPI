@@ -1,11 +1,11 @@
 import { Request, Response, Router } from "express";
-import IController from "./IController";
+import IController from "../types/IController";
 import StatusCode from "status-code-enum";
-import IService from "./IService";
-import { Model } from "./Model";
+import IService from "../types/IService";
+import { ModelBase } from "../types/ModelBase";
 
-export default class Controller implements IController {
-  protected service: IService<Model>;
+export default class ControllerBase implements IController {
+  protected service: IService<ModelBase>;
 
   Routers(): Router {
     throw new Error("Method not implemented.");
@@ -14,7 +14,7 @@ export default class Controller implements IController {
   async FindAll(request: Request, response: Response): Promise<Response> {
     try {
       return response.status(StatusCode.SuccessOK).send(await this.service.FindAll());
-    } catch (error) {
+    } catch (error) {      
       return response.status(StatusCode.ClientErrorBadRequest).send(error);
     }
   }

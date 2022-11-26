@@ -1,9 +1,8 @@
 import { Entity, Column } from "typeorm";
-import { Model } from "../types/Model";
+import { ModelBase } from "../types/ModelBase";
 
 @Entity()
-export default class Usuario extends Model{
-
+export default class Usuario extends ModelBase {
   @Column()
   Login: string;
 
