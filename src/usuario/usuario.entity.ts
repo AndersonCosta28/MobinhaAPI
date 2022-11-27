@@ -1,11 +1,26 @@
-import { Entity, Column } from "typeorm";
+import { Entity, Column, BeforeUpdate, BeforeInsert } from "typeorm";
 import { ModelBase } from "../types/ModelBase";
+import bcrypt from "bcrypt";
 
 @Entity()
 export default class Usuario extends ModelBase {
-  @Column()
+  @Column({unique: true})
   Login: string;
 
   @Column()
-  Senha: string;
+  Password: string;
+
+  @BeforeInsert()
+  async BeforeInsert()
+  {
+    this.Login = this.Login.toLowerCase();
+    this.Password = await bcrypt.hash(this.Password, 10);
+  }
+
+  @BeforeUpdate()
+  async BeforeUpdate()
+  {
+    this.Login = this.Login.toLowerCase();
+    this.Password = await bcrypt.hash(this.Password, 10);
+  }
 }

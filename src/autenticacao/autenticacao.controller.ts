@@ -8,7 +8,7 @@ export default class AutenticacaoController {
   async Login(request: Request, response: Response) {
     const usuarioLogin: UsuarioLogin = request.body;
     const retornoDoLogin = await this.autenticacaoService.Login(usuarioLogin);
-    return response.status(retornoDoLogin.statusCode).send({ id: retornoDoLogin.id, message: retornoDoLogin.message });
+    return response.status(retornoDoLogin.statusCode).send({ ...retornoDoLogin });
   }
 
   Routes(): Router {

@@ -8,7 +8,13 @@ export default class ControllerBase implements IController {
   protected service: IService<ModelBase>;
 
   Routers(): Router {
-    throw new Error("Method not implemented.");
+    const router: Router = Router();
+    router.get("/", this.FindAll.bind(this));
+    router.get("/:id", this.FindOneById.bind(this));
+    router.post("/", this.Create.bind(this));
+    router.put("/:id", this.Update.bind(this));
+    router.delete("/:id", this.Delete.bind(this));
+    return router;
   }
 
   async FindAll(request: Request, response: Response): Promise<Response> {

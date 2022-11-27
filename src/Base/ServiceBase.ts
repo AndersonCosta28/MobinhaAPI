@@ -35,7 +35,7 @@ export default class ServiceBase implements IService<ModelBase>{
 
   async Update(id: number, model: ModelBase): Promise<boolean> {
     const modelFinded: ModelBase | null = await this.FindOneById(id);
-    if (!modelFinded != null) throw new Error("Usuário não encontrado");
+    if (!modelFinded) throw new Error("Usuário não encontrado");
 
     try {
       const modelCreated = this.repository.create(model);
