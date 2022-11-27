@@ -1,8 +1,8 @@
 import { Request, Response, Router } from "express";
-import IController from "../types/IController";
+import IController from "../Types/IController";
 import StatusCode from "status-code-enum";
-import IService from "../types/IService";
-import { ModelBase } from "../types/ModelBase";
+import IService from "../Types/IService";
+import { ModelBase } from "../Types/ModelBase";
 
 export default class ControllerBase implements IController {
   protected service: IService<ModelBase>;

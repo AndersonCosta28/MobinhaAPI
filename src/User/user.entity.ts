@@ -1,9 +1,9 @@
 import { Entity, Column, BeforeUpdate, BeforeInsert } from "typeorm";
-import { ModelBase } from "../types/ModelBase";
+import { ModelBase } from "../Types/ModelBase";
 import bcrypt from "bcrypt";
 
 @Entity()
-export default class Usuario extends ModelBase {
+export default class User extends ModelBase {
   @Column({unique: true})
   Login: string;
 

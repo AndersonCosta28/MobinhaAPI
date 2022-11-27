@@ -1,11 +1,10 @@
 import express from "express";
-import { autenticacaoController } from "./autenticacao";
-import { usuarioController } from "./usuario";
-
+import { authenticationController } from "./Authentication";
+import { userController } from "./User"; 
 const app = express();
 
 app.use(express.json());
-app.use("/usuario", usuarioController.Routers());
-app.use("/autenticacao", autenticacaoController.Routes())
+app.use("/user", userController.Routers());
+app.use("/authentication", authenticationController.Routes())
 
 export default app;

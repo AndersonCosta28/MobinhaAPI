@@ -1,11 +1,11 @@
 import { DataSource } from "typeorm";
-import Usuario from "../usuario/usuario.entity";
+import User from "../User/user.entity";
 
 const AppDataSource = new DataSource({
   type: "sqlite",
   database: "app.db",
   synchronize: true,
-  entities: [Usuario]
+  entities: [User]
 });
 
 AppDataSource.initialize()
