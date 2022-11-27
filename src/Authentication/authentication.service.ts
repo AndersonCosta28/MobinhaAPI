@@ -9,8 +9,8 @@ export default class AuthenticationService {
   constructor(private readonly userService: UsuarioService) {}
   async Login(usuarioLogin: UserLogin): Promise<ResponseLogin> {
     const user = (await this.userService.FindOneByName(usuarioLogin.Login)) as User;
-    if (!user) return { statusCode: StatusCode.ClientErrorNotFound, message: "Usuário não existe", authenticated: false};
-    if (!(await bcrypt.compare(usuarioLogin.Password, user.Password))) return { statusCode: StatusCode.ClientErrorBadRequest, message: "Password incorreta", authenticated: false };
-    return { statusCode: StatusCode.SuccessAccepted, id: user.id, message: "Usuário autenticado com sucesso", authenticated: true };
+    if (!user) return { Code: StatusCode.ClientErrorNotFound, Message: "Usuário não existe", Authenticated: false };
+    if (!(await bcrypt.compare(usuarioLogin.Password, user.Password))) return { Code: StatusCode.ClientErrorBadRequest, Message: "Password incorreta", Authenticated: false };
+    return { Code: StatusCode.SuccessAccepted, IdUser: user.id, Message: "Usuário autenticado com sucesso", Authenticated: true, IdPlayer: user.Player.id, Nickname: user.Player.Nickname, EXP: user.Player.EXP, Level: user.Player.Level };
   }
 }

@@ -1,11 +1,12 @@
-import { DeleteResult, Repository, UpdateResult } from "typeorm";
+import { DataSource, DeleteResult, Repository, UpdateResult } from "typeorm";
+import AppDataSource from "../Database/DataSource";
 import IService from "../Types/IService";
 import { ModelBase } from "../Types/ModelBase";
-import User from "../user/user.entity";
-
+import User from "../User/user.entity";
 
 export default class ServiceBase implements IService<ModelBase>{
   protected repository: Repository<ModelBase | User>;
+  protected readonly dataSource: DataSource = AppDataSource;
 
   async FindAll(): Promise<ModelBase[]> {
     try {

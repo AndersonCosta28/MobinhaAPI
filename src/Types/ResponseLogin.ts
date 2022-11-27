@@ -1,8 +1,12 @@
 import StatusCode from "status-code-enum";
 
 export default interface ResponseLogin {
-  statusCode: StatusCode;
-  message?: string;
-  id?: number;
-  authenticated: boolean;
+  Code: StatusCode;
+  Message?: string;
+  IdUser?: number;
+  IdPlayer?: number;
+  Nickname?: string;
+  Authenticated: boolean;
+  EXP?: number;
+  Level?: number;
 }
