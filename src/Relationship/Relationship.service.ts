@@ -1,15 +1,11 @@
 import { DeleteResult, Repository, UpdateResult } from "typeorm";
 import IService from "@Types/IService";
-import User from "./user.entity";
+import Relationship from "./Relationship.entity";
 
-export default class UserService implements IService<User> {
-  constructor(private readonly repository: Repository<User>) {}
+export default class RelationshipService implements IService<Relationship> {
+  constructor(private readonly repository: Repository<Relationship>) {}
 
-  async FindOneByName(name: string): Promise<User | null>{
-    return await this.repository.findOneBy({Login: name.toLowerCase()})
-  }
-
-  async FindAll(): Promise<User[]> {
+  async FindAll(): Promise<Relationship[]> {
     try {
       return await this.repository.find();
     } catch (error: any) {
@@ -22,7 +18,7 @@ export default class UserService implements IService<User> {
     }
   }
 
-  async FindOneById(id: number): Promise<User | null> {
+  async FindOneById(id: number): Promise<Relationship | null> {
     try {
       const result = await this.repository.findOne({ where: { id } });
       return result;
@@ -36,7 +32,7 @@ export default class UserService implements IService<User> {
     }
   }
 
-  async Create(model: User): Promise<User> {
+  async Create(model: Relationship): Promise<Relationship> {
     try {
       const modelCreated = this.repository.create(model);
       return await this.repository.save(modelCreated);
@@ -50,9 +46,9 @@ export default class UserService implements IService<User> {
     }
   }
 
-  async Update(id: number, model: User): Promise<boolean> {
-    const modelFinded: User | null = await this.FindOneById(id);
-    if (!modelFinded) throw new Error("User não encontrado");
+  async Update(id: number, model: Relationship): Promise<boolean> {
+    const modelFinded: Relationship | null = await this.FindOneById(id);
+    if (!modelFinded) throw new Error("Relationship não encontrado");
 
     try {
       const modelCreated = this.repository.create(model);
@@ -69,8 +65,8 @@ export default class UserService implements IService<User> {
   }
 
   async Delete(id: number): Promise<boolean> {
-    const modelFinded: User | null = await this.FindOneById(id);
-    if (!modelFinded != null) throw new Error("User não encontrado");
+    const modelFinded: Relationship | null = await this.FindOneById(id);
+    if (!modelFinded != null) throw new Error("Relationship não encontrado");
 
     try {
       const resultDelete: DeleteResult = await this.repository.delete({ id: id });

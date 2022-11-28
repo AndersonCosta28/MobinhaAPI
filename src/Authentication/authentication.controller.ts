@@ -11,7 +11,7 @@ export default class AuthenticationController {
     return response.status(retornoDoLogin.Code).send({ ...retornoDoLogin });
   }
 
-  Routes(): Router {
+  Routers(): Router {
     const router = Router();
     router.post("/", this.Login.bind(this));
     return router;

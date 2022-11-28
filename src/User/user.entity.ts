@@ -1,29 +1,37 @@
-import { Entity, Column, BeforeUpdate, BeforeInsert, OneToOne, JoinColumn } from "typeorm";
-import { ModelBase } from "../Types/ModelBase";
+import { Entity, Column, BeforeUpdate, BeforeInsert, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 import bcrypt from "bcrypt";
-import Player from "../Player/player.entity";
 
 @Entity()
-export default class User extends ModelBase {
+export default class User {
+  @PrimaryGeneratedColumn()
+  id: number;
+
   @Column({ unique: true })
   Login: string;
 
   @Column()
   Password: string;
 
-  @OneToOne(() => Player, { cascade: true, eager: true })
-  @JoinColumn()
-  Player: Player;
+  @Column({ nullable: false })
+  Nickname: string;
+
+  @Column()
+  Level: number;
+
+  @Column()
+  EXP: number;
 
   @BeforeInsert()
   async BeforeInsert() {
     this.Login = this.Login.toLowerCase();
     this.Password = await bcrypt.hash(this.Password, 10);
   }
-
+  // Quando atualizarmos o nível ou outra coisa do usuário terá que ser feito endpoints diferente para isso para não ter que Hashear uma senha hash
+  // Não foi criado uma outra tabela para isso para não confundir os ID's, por que a relação é de um para um
+  /*
   @BeforeUpdate()
   async BeforeUpdate() {
-    this.Login = this.Login.toLowerCase();
     this.Password = await bcrypt.hash(this.Password, 10);
   }
+  */
 }

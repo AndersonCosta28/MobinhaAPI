@@ -1,11 +1,11 @@
 import { Request, Response, Router } from "express";
-import IController from "../Types/IController";
 import StatusCode from "status-code-enum";
-import IService from "../Types/IService";
-import { ModelBase } from "../Types/ModelBase";
+import IController from "@Types/IController";
+import IService from "@Types/IService";
+import Relationship from "./Relationship.entity";
 
-export default class ControllerBase implements IController {
-  protected service: IService<ModelBase>;
+export default class RelationshipController implements IController {
+  constructor(private readonly service: IService<Relationship>) {}
 
   Routers(): Router {
     const router: Router = Router();
@@ -20,8 +20,8 @@ export default class ControllerBase implements IController {
   async FindAll(request: Request, response: Response): Promise<Response> {
     try {
       return response.status(StatusCode.SuccessOK).send(await this.service.FindAll());
-    } catch (error) {      
-      return response.status(StatusCode.ClientErrorBadRequest).send(error);
+    } catch (error: any) {
+      return response.status(StatusCode.ClientErrorBadRequest).json({ message: error.message });
     }
   }
 
@@ -29,8 +29,8 @@ export default class ControllerBase implements IController {
     try {
       const { id } = request.params;
       return response.status(StatusCode.SuccessOK).send(await this.service.FindOneById(Number(id)));
-    } catch (error) {
-      return response.status(StatusCode.ClientErrorBadRequest).send(error);
+    } catch (error: any) {
+      return response.status(StatusCode.ClientErrorBadRequest).json({ message: error.message });
     }
   }
 
@@ -38,8 +38,8 @@ export default class ControllerBase implements IController {
     try {
       const model = request.body;
       return response.status(StatusCode.SuccessOK).send(await this.service.Create(model));
-    } catch (error) {
-      return response.status(StatusCode.ClientErrorBadRequest).send(error);
+    } catch (error: any) {
+      return response.status(StatusCode.ClientErrorBadRequest).json({ message: error.message });
     }
   }
 
@@ -48,8 +48,8 @@ export default class ControllerBase implements IController {
       const { id } = request.params;
       const model = request.body;
       return response.status(StatusCode.SuccessOK).send(await this.service.Update(Number(id), model));
-    } catch (error) {
-      return response.status(StatusCode.ClientErrorBadRequest).send(error);
+    } catch (error: any) {
+      return response.status(StatusCode.ClientErrorBadRequest).json({ message: error.message });
     }
   }
 
@@ -57,8 +57,8 @@ export default class ControllerBase implements IController {
     try {
       const { id } = request.params;
       return response.status(StatusCode.SuccessOK).send(await this.service.Delete(Number(id)));
-    } catch (error) {
-      return response.status(StatusCode.ClientErrorBadRequest).send(error);
+    } catch (error: any) {
+      return response.status(StatusCode.ClientErrorBadRequest).json({ message: error.message });
     }
   }
 }

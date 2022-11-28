@@ -11,6 +11,6 @@ export default class AuthenticationService {
     const user = (await this.userService.FindOneByName(usuarioLogin.Login)) as User;
     if (!user) return { Code: StatusCode.ClientErrorNotFound, Message: "Usuário não existe", Authenticated: false };
     if (!(await bcrypt.compare(usuarioLogin.Password, user.Password))) return { Code: StatusCode.ClientErrorBadRequest, Message: "Password incorreta", Authenticated: false };
-    return { Code: StatusCode.SuccessAccepted, IdUser: user.id, Message: "Usuário autenticado com sucesso", Authenticated: true, IdPlayer: user.Player.id, Nickname: user.Player.Nickname, EXP: user.Player.EXP, Level: user.Player.Level };
+    return { Code: StatusCode.SuccessAccepted, IdUser: user.id, Message: "Usuário autenticado com sucesso", Authenticated: true, Nickname: user.Nickname, EXP: user.EXP, Level: user.Level };
   }
 }
