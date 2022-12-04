@@ -1,12 +1,11 @@
 import { DeleteResult, Repository, UpdateResult } from "typeorm";
-import IService from "@Types/IService";
 import User from "./user.entity";
 
-export default class UserService implements IService<User> {
+export default class UserService {
   constructor(private readonly repository: Repository<User>) {}
 
-  async FindOneByName(name: string): Promise<User | null>{
-    return await this.repository.findOneBy({Login: name.toLowerCase()})
+  async FindOneByName(name: string): Promise<User | null> {
+    return await this.repository.findOneBy({ Login: name.toLowerCase() });
   }
 
   async FindAll(): Promise<User[]> {

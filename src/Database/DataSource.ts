@@ -1,13 +1,18 @@
-import Relationship from "../Relationship/Relationship.entity";
+import Friends from "../Friends/FriendShip.entity";
 import User from "../User/user.entity";
 import { DataSource } from "typeorm";
 
 const AppDataSource = new DataSource({
   type: "mysql",
-  url: "mysql://root:mysqlpw@localhost:55000",
+  host: "localhost",
+  port: 3306,
+  username: "root",
+  password: "1234",
   database: "Mobinha",
-  synchronize: true,
-  entities: [User, Relationship],
+  // url: "mysql://root:mysqlpw@localhost:55000", //DOCKER
+  // synchronize: true,
+  // migrationsRun: false,
+  entities: [User, Friends],
 });
 
 AppDataSource.initialize()

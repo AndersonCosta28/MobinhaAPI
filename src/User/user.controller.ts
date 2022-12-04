@@ -1,11 +1,10 @@
 import { Request, Response, Router } from "express";
 import StatusCode from "status-code-enum";
-import IController from "@Types/IController";
-import IService from "@Types/IService";
 import User from "./user.entity";
+import UserService from "./user.service";
 
-export default class UserController implements IController {
-  constructor(private readonly service: IService<User>) {}
+export default class UserController {
+  constructor(private readonly service: UserService) {}
 
   Routers(): Router {
     const router: Router = Router();

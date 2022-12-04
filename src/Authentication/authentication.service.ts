@@ -1,5 +1,5 @@
 import StatusCode from "status-code-enum";
-import ResponseLogin from "../Types/ResponseLogin";
+import ResponseLogin from "@Types/ResponseLogin";
 import User from "../User/user.entity";
 import UsuarioService from "../User/user.service";
 import { UserLogin } from "./UserLogin";
