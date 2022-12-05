@@ -1,8 +1,8 @@
-import { TypeOfFriendShip } from "../Types/FriendShip";
+import { TypeOfFriendship } from "@Types/Friendship";
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
-export default class FriendShip {
+export default class Friendship {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -14,8 +14,8 @@ export default class FriendShip {
 
   @Column({
     type: "enum",
-    enum: TypeOfFriendShip,
-    default: TypeOfFriendShip.requested,
+    enum: TypeOfFriendship,
+    default: TypeOfFriendship.requested,
   })
-  Type: TypeOfFriendShip;
+  Type: TypeOfFriendship;
 }

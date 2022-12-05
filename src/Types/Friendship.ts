@@ -1,19 +1,19 @@
-export enum TypeOfFriendShip {
+export enum TypeOfFriendship {
   requested,
   friend,
   blocked,
 }
 
-export type BodyRequestCreate = {
+export type CreateBodyRequest = {
   SourceId: number;
   TargetName: string;
 };
 
-export type BodyRequestFindAllByUser = {
+export type FindAllByUserBodyRequest = {
   UserId: number;
 };
 
-export type BodyRequestReactToFriendRequest = {
+export type ReactToFriendRequestBodyRequest = {
   UserId: number;
   FriendId: number;
   React: boolean;

@@ -1,4 +1,4 @@
-import Friends from "../Friends/FriendShip.entity";
+import Friendship from "../Friendship/Friendship.entity"; 
 import User from "../User/user.entity";
 import { DataSource } from "typeorm";
 
@@ -12,7 +12,7 @@ const AppDataSource = new DataSource({
   // url: "mysql://root:mysqlpw@localhost:55000", //DOCKER
   // synchronize: true,
   // migrationsRun: false,
-  entities: [User, Friends],
+  entities: [User, Friendship],
 });
 
 AppDataSource.initialize()

@@ -1,11 +1,11 @@
 import { DeleteResult, Repository, UpdateResult } from "typeorm";
-import FriendShip from "./FriendShip.entity";
-import { TypeOfFriendShip } from "../Types/FriendShip";
+import Friendship from "./Friendship.entity";
+import { TypeOfFriendship } from "@Types/Friendship";
 
-export default class FriendsService {
-  constructor(private readonly repository: Repository<FriendShip>) {}
+export default class FriendshipService {
+  constructor(private readonly repository: Repository<Friendship>) {}
 
-  async FindAllByUser(idUser: number): Promise<FriendShip[]> {
+  async FindAllByUser(idUser: number): Promise<Friendship[]> {
     const result = await this.repository.findBy([{ SourceId: idUser }, { TargetId: idUser }]);
 
     return result;
@@ -16,7 +16,7 @@ export default class FriendsService {
       const friendShip = this.repository.create({
         SourceId: userSource,
         TargetId: userTarget,
-        Type: TypeOfFriendShip.requested,
+        Type: TypeOfFriendship.requested,
       });
       await this.repository.save(friendShip);
     } catch (error: any) {
@@ -30,7 +30,7 @@ export default class FriendsService {
   }
 
   async CheckIfItAlreadyExists(idSource: number, idTarget: number) {
-    const result: FriendShip[] = await this.repository.findBy([
+    const result: Friendship[] = await this.repository.findBy([
       { SourceId: idSource, TargetId: idTarget },
       { SourceId: idTarget, TargetId: idSource },
     ]);
@@ -40,13 +40,13 @@ export default class FriendsService {
 
   async ReactToFriendRequest(react: boolean, userId: number, friendId: number) {
     const friendShip = await this.FindOneById(friendId);
-    if (!friendShip) throw new Error("FriendShip not found");
+    if (!friendShip) throw new Error("Friendship not found");
     if(friendShip.TargetId != userId) throw new Error("Only the recipient can react to the request");
-    if (react) await this.repository.update(friendId, { ...friendShip, Type: TypeOfFriendShip.friend });
+    if (react) await this.repository.update(friendId, { ...friendShip, Type: TypeOfFriendship.friend });
     else await this.repository.delete(friendId);
   }
 
-  async FindOneById(id: number): Promise<FriendShip | null> {
+  async FindOneById(id: number): Promise<Friendship | null> {
     try {
       const result = await this.repository.findOne({ where: { id } });
       return result;
@@ -61,8 +61,8 @@ export default class FriendsService {
   }
 
   async Delete(id: number): Promise<boolean> {
-    const modelFinded: FriendShip | null = await this.FindOneById(id);
-    if (!modelFinded) throw new Error("FriendShip não encontrado");
+    const modelFinded: Friendship | null = await this.FindOneById(id);
+    if (!modelFinded) throw new Error("Friendship não encontrado");
 
     try {
       const resultDelete: DeleteResult = await this.repository.delete({ id: id });
@@ -77,7 +77,7 @@ export default class FriendsService {
     }
   }
   /*
-  async FindAll(): Promise<FriendShip[]> {
+  async FindAll(): Promise<Friendship[]> {
     try {
       return await this.repository.find();
     } catch (error: any) {
@@ -91,7 +91,7 @@ export default class FriendsService {
   }
 
 
-  async Create(model: FriendShip): Promise<FriendShip> {
+  async Create(model: Friendship): Promise<Friendship> {
     try {
       const modelCreated = this.repository.create(model);
       return await this.repository.save(modelCreated);
@@ -105,9 +105,9 @@ export default class FriendsService {
     }
   }
 
-  async Update(id: number, model: FriendShip): Promise<boolean> {
-    const modelFinded: FriendShip | null = await this.FindOneById(id);
-    if (!modelFinded) throw new Error("FriendShip não encontrado");
+  async Update(id: number, model: Friendship): Promise<boolean> {
+    const modelFinded: Friendship | null = await this.FindOneById(id);
+    if (!modelFinded) throw new Error("Friendship não encontrado");
 
     try {
       const modelCreated = this.repository.create(model);

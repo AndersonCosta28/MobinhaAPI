@@ -1,10 +1,10 @@
-import { BodyRequestCreate, BodyRequestFindAllByUser, BodyRequestReactToFriendRequest } from "@Types/FriendShip";
+import { CreateBodyRequest, FindAllByUserBodyRequest, ReactToFriendRequestBodyRequest } from "@Types/Friendship";
 import { Request, Response, Router } from "express";
 import StatusCode from "status-code-enum";
 import UserService from "User/user.service";
-import FriendsService from "./FriendShip.service";
+import FriendsService from "./Friendship.service";
 
-export default class FriendsController {
+export default class FriendshipController {
   constructor(private readonly service: FriendsService, private readonly userService: UserService) {}
 
   Routers(): Router {
@@ -16,8 +16,9 @@ export default class FriendsController {
   }
 
   async Create(request: Request, response: Response): Promise<Response> {
+    console.log(request.body);
     try {
-      const { TargetName, SourceId } = request.body as BodyRequestCreate;
+      const { TargetName, SourceId } = request.body as CreateBodyRequest;
       const userTarget = await this.userService.FindOneByName(TargetName);
       if (!userTarget) return response.status(StatusCode.ClientErrorNotFound).end();
       if (userTarget.id == SourceId) return response.status(StatusCode.ClientErrorBadRequest).json({ message: "You cannot add yourself" });
@@ -31,7 +32,7 @@ export default class FriendsController {
 
   async FindAllByUser(request: Request, response: Response): Promise<Response> {
     try {
-      const { UserId } = request.body as BodyRequestFindAllByUser;
+      const { UserId } = request.body as FindAllByUserBodyRequest;
       return response.status(StatusCode.SuccessOK).send(await this.service.FindAllByUser(Number(UserId)));
     } catch (error: any) {
       return response.status(StatusCode.ClientErrorBadRequest).json({ message: error.message });
@@ -40,7 +41,7 @@ export default class FriendsController {
 
   async ReactToFriendRequest(request: Request, response: Response): Promise<Response> {
     try {
-      const { FriendId, React, UserId } = request.body as BodyRequestReactToFriendRequest;
+      const { FriendId, React, UserId } = request.body as ReactToFriendRequestBodyRequest;
       return response.status(StatusCode.SuccessOK).send(await this.service.ReactToFriendRequest(React, Number(UserId), Number(FriendId)));
     } catch (error: any) {
       return response.status(StatusCode.ClientErrorBadRequest).json({ message: error.message });
