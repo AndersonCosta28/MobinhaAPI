@@ -15,6 +15,6 @@ export type FindAllByUserBodyRequest = {
 
 export type ReactToFriendRequestBodyRequest = {
   UserId: number;
-  FriendId: number;
+  FriendshipId: number;
   React: boolean;
 };

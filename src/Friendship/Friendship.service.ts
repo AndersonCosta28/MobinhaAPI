@@ -1,21 +1,40 @@
 import { DeleteResult, Repository, UpdateResult } from "typeorm";
 import Friendship from "./Friendship.entity";
 import { TypeOfFriendship } from "@Types/Friendship";
+import UserService from "User/user.service";
+import User from "User/user.entity";
 
 export default class FriendshipService {
-  constructor(private readonly repository: Repository<Friendship>) {}
+  constructor(private readonly repository: Repository<Friendship>, private readonly userService: UserService) {}
 
   async FindAllByUser(idUser: number): Promise<Friendship[]> {
-    const result = await this.repository.findBy([{ SourceId: idUser }, { TargetId: idUser }]);
-
+    const result = await this.repository.find({
+      relations: {
+        UserSource: true,
+        UserTarget: true,
+      },
+      select: {
+        UserSource: {
+          id: true,
+          Nickname: true,
+          Level: true,          
+        },
+        UserTarget: {
+          id: true,
+          Nickname: true,
+          Level: true,
+        },
+      },
+      where: [{ UserSource: { id: idUser } }, { UserTarget: { id: idUser } }],
+    });
     return result;
   }
 
   async CreateFriendshipRequest(userSource: number, userTarget: number) {
     try {
-      const friendShip = this.repository.create({
-        SourceId: userSource,
-        TargetId: userTarget,
+      const friendShip: Friendship = this.repository.create({
+        UserSource: { id: userSource },
+        UserTarget: { id: userTarget },
         Type: TypeOfFriendship.requested,
       });
       await this.repository.save(friendShip);
@@ -31,9 +50,10 @@ export default class FriendshipService {
 
   async CheckIfItAlreadyExists(idSource: number, idTarget: number) {
     const result: Friendship[] = await this.repository.findBy([
-      { SourceId: idSource, TargetId: idTarget },
-      { SourceId: idTarget, TargetId: idSource },
+      { UserSource: { id: idSource }, UserTarget: { id: idTarget } },
+      { UserSource: { id: idTarget }, UserTarget: { id: idSource } },
     ]);
+    // await this.repository.findBy()
 
     return result.length > 0;
   }
@@ -41,7 +61,7 @@ export default class FriendshipService {
   async ReactToFriendRequest(react: boolean, userId: number, friendId: number) {
     const friendShip = await this.FindOneById(friendId);
     if (!friendShip) throw new Error("Friendship not found");
-    if(friendShip.TargetId != userId) throw new Error("Only the recipient can react to the request");
+    if (friendShip.UserTarget.id != userId) throw new Error("Only the recipient can react to the request");
     if (react) await this.repository.update(friendId, { ...friendShip, Type: TypeOfFriendship.friend });
     else await this.repository.delete(friendId);
   }

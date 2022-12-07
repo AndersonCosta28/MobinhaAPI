@@ -8,11 +8,10 @@ const AppDataSource = new DataSource({
   port: 3306,
   username: "root",
   password: "1234",
-  database: "Mobinha",
-  // url: "mysql://root:mysqlpw@localhost:55000", //DOCKER
-  // synchronize: true,
-  // migrationsRun: false,
+  database: "mobinha2",
   entities: [User, Friendship],
+  // url: "mysql://root:mysqlpw@localhost:55000", //DOCKER
+  synchronize: true,
 });
 
 AppDataSource.initialize()

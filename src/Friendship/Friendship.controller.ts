@@ -41,8 +41,8 @@ export default class FriendshipController {
 
   async ReactToFriendRequest(request: Request, response: Response): Promise<Response> {
     try {
-      const { FriendId, React, UserId } = request.body as ReactToFriendRequestBodyRequest;
-      return response.status(StatusCode.SuccessOK).send(await this.service.ReactToFriendRequest(React, Number(UserId), Number(FriendId)));
+      const { FriendshipId, React, UserId } = request.body as ReactToFriendRequestBodyRequest;
+      return response.status(StatusCode.SuccessOK).send(await this.service.ReactToFriendRequest(React, Number(UserId), Number(FriendshipId)));
     } catch (error: any) {
       return response.status(StatusCode.ClientErrorBadRequest).json({ message: error.message });
     }
