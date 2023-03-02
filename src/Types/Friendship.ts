@@ -1,20 +1,40 @@
+import Profile from "Profile/Profile.entity"
+
 export enum TypeOfFriendship {
-  requested,
-  friend,
-  blocked,
+  "Requested",
+  "Friend",
+  "Blocked",
+  "Removed"
 }
 
-export type CreateBodyRequest = {
-  SourceId: number;
-  TargetName: string;
-};
+export enum FriendshipRequestType { Sent, Received }
 
-export type FindAllByUserBodyRequest = {
-  UserId: number;
-};
+export interface ICreateBodyRequest {
+  ProfileSourceId: number
+  ProfileTargetName: string
+}
 
-export type ReactToFriendRequestBodyRequest = {
-  UserId: number;
-  FriendshipId: number;
-  React: boolean;
-};
+export interface IFindAllByUserBodyRequest {
+  ProfileId: number
+}
+
+export type IReactToFriendRequestBodyRequest = {
+  ProfileId: number
+  FriendshipId: number
+  React: boolean
+}
+
+export interface IMessage {
+  FriendshipId: number
+  FromId: number
+  ToId: number
+  Message: string
+  id: number
+}
+
+export interface IFriend {
+  FriendshipId: number
+  FriendProfile: Profile
+  Type: TypeOfFriendship | string
+  FriendshipRequestType: FriendshipRequestType,
+}

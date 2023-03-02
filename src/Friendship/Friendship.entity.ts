@@ -1,24 +1,20 @@
-import { TypeOfFriendship } from "@Types/Friendship";
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
-import User from "../User/user.entity";
+import { TypeOfFriendship } from "Types/Friendship" 
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm"
+import Profile from "Profile/Profile.entity"
 
 @Entity()
 export default class Friendship {
-  @PrimaryGeneratedColumn()
-  id: number;
+	@PrimaryGeneratedColumn()
+		id: number
 
-  @ManyToOne(() => User, (user) => user.id)
-  // @Column({ nullable: false, default: 0 })
-  UserSource: User;
+	@ManyToOne(() => Profile, (profile) => profile.id, { eager: true })
+		Source: Profile
 
-  @ManyToOne(() => User, (user) => user.id)
-  // @Column({ nullable: false, default: 0 })
-  UserTarget: User;
+	@ManyToOne(() => Profile, (profile) => profile.id, { eager: true })
+		Target: Profile
 
-  @Column({
-    type: "enum",
-    enum: TypeOfFriendship,
-    default: TypeOfFriendship.requested,
-  })
-  Type: TypeOfFriendship;
+	@Column({ type: "enum", enum: TypeOfFriendship, default: TypeOfFriendship.Requested })
+		Type: TypeOfFriendship | string
+
+	friendProfile?: Profile
 }

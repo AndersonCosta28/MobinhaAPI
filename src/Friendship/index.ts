@@ -1,11 +1,10 @@
-import { userService } from "../User";
-import AppDataSource from "../Database/DataSource";
-import FriendshipController from "./Friendship.controller";
-import FriendshipService from "./Friendship.service";
-import Friendship from "./Friendship.entity";
+import AppDataSource from "Providers/Database/DataSource"
+import FriendshipController, { IFriendshipController } from "./Friendship.controller"
+import FriendshipService, { IFriendshipService } from "./Friendship.service"
+import Friendship from "./Friendship.entity"
 
-const repository = AppDataSource.getRepository<Friendship>(Friendship);
-const friendshipService: FriendshipService = new FriendshipService(repository, userService);
-const friendshipController: FriendshipController = new FriendshipController(friendshipService, userService);
+const repository = AppDataSource.getRepository<Friendship>(Friendship)
+const friendshipService: IFriendshipService = new FriendshipService(repository)
+const friendshipController: IFriendshipController = new FriendshipController(friendshipService)
 
-export { friendshipService, friendshipController };
+export { friendshipService, friendshipController }

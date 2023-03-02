@@ -1,19 +1,24 @@
-import { Request, Response, Router } from "express";
-import AuthenticationService from "./authentication.service";
-import { UserLogin } from "./UserLogin";
+import { Request, Response, Router } from "express"
+import { IAuthenticationService } from "./authentication.service"
+import { IUserLogin } from "Types/User"
+import IController from "Types/IController"
 
-export default class AuthenticationController {
-  constructor(private readonly AuthenticationService: AuthenticationService) {}
+export interface IAuthenticationController extends IController {
+	login: (request: Request, response: Response) => Promise<Response>
+}
 
-  async Login(request: Request, response: Response) {
-    const usuarioLogin: UserLogin = request.body;
-    const retornoDoLogin = await this.AuthenticationService.Login(usuarioLogin);
-    return response.status(retornoDoLogin.Code).send({ ...retornoDoLogin });
-  }
+export default class AuthenticationController implements IAuthenticationController {
+	constructor(private readonly AuthenticationService: IAuthenticationService) { }
 
-  Routers(): Router {
-    const router = Router();
-    router.post("/", this.Login.bind(this));
-    return router;
-  }
+	login = async (request: Request, response: Response): Promise<Response> => {
+		const usuarioLogin: IUserLogin = request.body
+		const retornoDoLogin = await this.AuthenticationService.login(usuarioLogin)
+		return response.status(retornoDoLogin.code).send({ ...retornoDoLogin })
+	}
+
+	routers = (): Router => {
+		const router = Router()
+		router.post("/", this.login)
+		return router
+	}
 }

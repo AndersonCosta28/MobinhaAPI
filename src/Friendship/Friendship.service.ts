@@ -1,147 +1,98 @@
-import { DeleteResult, Repository, UpdateResult } from "typeorm";
-import Friendship from "./Friendship.entity";
-import { TypeOfFriendship } from "@Types/Friendship";
-import UserService from "User/user.service";
-import User from "User/user.entity";
+import { Repository } from "typeorm"
+import Friendship from "./Friendship.entity"
+import { IFriend, FriendshipRequestType, TypeOfFriendship } from "Types/Friendship"
+import { CustomErrorAPI } from "Types/CustomErrors"
 
-export default class FriendshipService {
-  constructor(private readonly repository: Repository<Friendship>, private readonly userService: UserService) {}
+export interface IFriendshipService {
+	findAllByProfile: (idProfile: number) => Promise<IFriend[]>
+	findOneById: (id: number) => Promise<Friendship>
+	findOneByProfilesId: (idSource: number, idTarget: number) => Promise<Friendship | null>
+	createFriendshipRequest: (profileSource: number, profileTarget: number) => Promise<void>
+	reactToFriendRequest: (react: boolean, userId: number, friendId: number) => Promise<void>
+	remove: (id: number) => Promise<void>
+	updateTypeFriendship: (friendship: Friendship, type: TypeOfFriendship) => Promise<void>
+}
 
-  async FindAllByUser(idUser: number): Promise<Friendship[]> {
-    const result = await this.repository.find({
-      relations: {
-        UserSource: true,
-        UserTarget: true,
-      },
-      select: {
-        UserSource: {
-          id: true,
-          Nickname: true,
-          Level: true,          
-        },
-        UserTarget: {
-          id: true,
-          Nickname: true,
-          Level: true,
-        },
-      },
-      where: [{ UserSource: { id: idUser } }, { UserTarget: { id: idUser } }],
-    });
-    return result;
-  }
+export default class FriendshipService implements IFriendshipService {
+	constructor(private readonly repository: Repository<Friendship>) { }
 
-  async CreateFriendshipRequest(userSource: number, userTarget: number) {
-    try {
-      const friendShip: Friendship = this.repository.create({
-        UserSource: { id: userSource },
-        UserTarget: { id: userTarget },
-        Type: TypeOfFriendship.requested,
-      });
-      await this.repository.save(friendShip);
-    } catch (error: any) {
-      if (typeof error === "string") throw new Error(error);
-      else if (error instanceof Error) throw new Error(error.message);
-      else {
-        console.log(error);
-        throw new Error("Erro não catalogado, verificar o log no servidor");
-      }
-    }
-  }
+	findAllByProfile = async (idProfile: number): Promise<IFriend[]> => {
+		const friendList: IFriend[] = []
+		const friendships: Friendship[] = await this.repository.find({
+			select: {
+				Source: {
+					id: true,
+					Nickname: true,
+				},
+				Target: {
+					id: true,
+					Nickname: true,
+				},
+			},
+			where: [{ Source: { id: idProfile } }, { Target: { id: idProfile } }],
+		})
 
-  async CheckIfItAlreadyExists(idSource: number, idTarget: number) {
-    const result: Friendship[] = await this.repository.findBy([
-      { UserSource: { id: idSource }, UserTarget: { id: idTarget } },
-      { UserSource: { id: idTarget }, UserTarget: { id: idSource } },
-    ]);
-    // await this.repository.findBy()
+		for (const friendship of friendships) {
+			const friendProfile = friendship.Source.id === idProfile ? friendship.Target : friendship.Source
+			friendList.push({
+				FriendshipId: friendship.id,
+				Type: friendship.Type,
+				FriendshipRequestType: friendship.Source.id === idProfile ? FriendshipRequestType.Sent : FriendshipRequestType.Received,
+				FriendProfile: {
+					...friendProfile,
+					Description: friendProfile.Description ?? "",
+				}
+			})
+		}
 
-    return result.length > 0;
-  }
+		return friendList
+	}
 
-  async ReactToFriendRequest(react: boolean, userId: number, friendId: number) {
-    const friendShip = await this.FindOneById(friendId);
-    if (!friendShip) throw new Error("Friendship not found");
-    if (friendShip.UserTarget.id != userId) throw new Error("Only the recipient can react to the request");
-    if (react) await this.repository.update(friendId, { ...friendShip, Type: TypeOfFriendship.friend });
-    else await this.repository.delete(friendId);
-  }
+	createFriendshipRequest = async (userSource: number, userTarget: number): Promise<void> => {
+		const friendShip: Friendship = this.repository.create({
+			Source: { id: userSource },
+			Target: { id: userTarget },
+			Type: TypeOfFriendship.Requested,
+		})
+		await this.repository.save(friendShip)
+	}
 
-  async FindOneById(id: number): Promise<Friendship | null> {
-    try {
-      const result = await this.repository.findOne({ where: { id } });
-      return result;
-    } catch (error: any) {
-      if (typeof error === "string") throw new Error(error);
-      else if (error instanceof Error) throw new Error(error.message);
-      else {
-        console.log(error);
-        throw new Error("Erro não catalogado, verificar o log no servidor");
-      }
-    }
-  }
+	updateTypeFriendship = async (friendship: Friendship, type: TypeOfFriendship): Promise<void> => {
+		friendship.Type = type
+		const friendshipCreated = this.repository.create(friendship)
+		await this.repository.save(friendshipCreated)
+	}
 
-  async Delete(id: number): Promise<boolean> {
-    const modelFinded: Friendship | null = await this.FindOneById(id);
-    if (!modelFinded) throw new Error("Friendship não encontrado");
+	reactToFriendRequest = async (react: boolean, ProfileId: number, friendShipId: number): Promise<void> => {
+		const friendship = await this.findOneById(friendShipId)
+		if (friendship.Target.id !== ProfileId) throw new CustomErrorAPI("Only the recipient can react to the request")
+		if (react) await this.updateTypeFriendship(friendship, TypeOfFriendship.Friend)
+		else await this.repository.delete(friendShipId)
+	}
 
-    try {
-      const resultDelete: DeleteResult = await this.repository.delete({ id: id });
-      return resultDelete.affected! > 0;
-    } catch (error: any) {
-      if (typeof error === "string") throw new Error(error);
-      else if (error instanceof Error) throw new Error(error.message);
-      else {
-        console.log(error);
-        throw new Error("Erro não catalogado, verificar o log no servidor");
-      }
-    }
-  }
-  /*
-  async FindAll(): Promise<Friendship[]> {
-    try {
-      return await this.repository.find();
-    } catch (error: any) {
-      if (typeof error === "string") throw new Error(error);
-      else if (error instanceof Error) throw new Error(error.message);
-      else {
-        console.log(error);
-        throw new Error("Erro não catalogado, verificar o log no servidor");
-      }
-    }
-  }
+	findOneById = async (id: number): Promise<Friendship> => {
+		const result: Friendship | null = await this.repository.findOne({
+			where: { id }, relations: {
+				Source: true,
+				Target: true
+			}
+		})
+		if (result === null) throw new CustomErrorAPI("Friendship not found")
+		return result
+	}
 
+	findOneByProfilesId = async (idSource: number, idTarget: number): Promise<Friendship | null> => {
+		const friendship: Friendship | null = await this.repository.findOneBy([
+			{ Source: { id: idSource }, Target: { id: idTarget } },
+			{ Source: { id: idTarget }, Target: { id: idSource } },
+		])
+		return friendship
+	}
 
-  async Create(model: Friendship): Promise<Friendship> {
-    try {
-      const modelCreated = this.repository.create(model);
-      return await this.repository.save(modelCreated);
-    } catch (error: any) {
-      if (typeof error === "string") throw new Error(error);
-      else if (error instanceof Error) throw new Error(error.message);
-      else {
-        console.log(error);
-        throw new Error("Erro não catalogado, verificar o log no servidor");
-      }
-    }
-  }
-
-  async Update(id: number, model: Friendship): Promise<boolean> {
-    const modelFinded: Friendship | null = await this.FindOneById(id);
-    if (!modelFinded) throw new Error("Friendship não encontrado");
-
-    try {
-      const modelCreated = this.repository.create(model);
-      const resultUpdate: UpdateResult = await this.repository.update(id, modelCreated);
-      return resultUpdate.affected! > 0;
-    } catch (error: any) {
-      if (typeof error === "string") throw new Error(error);
-      else if (error instanceof Error) throw new Error(error.message);
-      else {
-        console.log(error);
-        throw new Error("Erro não catalogado, verificar o log no servidor");
-      }
-    }
-  }
-
-  */
+	remove = async (id: number): Promise<void> => {
+		const modelFinded: Friendship | null = await this.findOneById(id)
+		await this.repository.remove(modelFinded)
+		// modelFinded.Type = TypeOfFriendship.Removed
+		// await this.repository.save(modelFinded)
+	}
 }

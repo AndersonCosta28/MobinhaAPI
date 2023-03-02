@@ -1,87 +1,58 @@
-import { CreateBodyRequest, FindAllByUserBodyRequest, ReactToFriendRequestBodyRequest } from "@Types/Friendship";
-import { Request, Response, Router } from "express";
-import StatusCode from "status-code-enum";
-import UserService from "User/user.service";
-import FriendsService from "./Friendship.service";
+import { ICreateBodyRequest, IFindAllByUserBodyRequest, IReactToFriendRequestBodyRequest, TypeOfFriendship } from "Types/Friendship"
+import { Request, Response, Router } from "express"
+import { StatusCode } from "status-code-enum"
+import { IFriendshipService } from "./Friendship.service"
+import IController from "Types/IController"
+import AppDataSource from "Providers/Database/DataSource"
+import Profile from "Profile/Profile.entity"
 
-export default class FriendshipController {
-  constructor(private readonly service: FriendsService, private readonly userService: UserService) {}
+export interface IFriendshipController extends IController {
+	create: (request: Request, response: Response) => Promise<Response>
+	findAllByProfile: (request: Request, response: Response) => Promise<Response>
+	reactToFriendRequest: (request: Request, response: Response) => Promise<Response>
+}
 
-  Routers(): Router {
-    const router: Router = Router();
-    router.get("/", this.FindAllByUser.bind(this));
-    router.post("/", this.Create.bind(this));
-    router.post("/ReactToFriendRequest", this.ReactToFriendRequest.bind(this));
-    return router;
-  }
+export default class FriendshipController implements IFriendshipController {
+	constructor(private readonly service: IFriendshipService) { }
 
-  async Create(request: Request, response: Response): Promise<Response> {
-    console.log(request.body);
-    try {
-      const { TargetName, SourceId } = request.body as CreateBodyRequest;
-      const userTarget = await this.userService.FindOneByName(TargetName);
-      if (!userTarget) return response.status(StatusCode.ClientErrorNotFound).end();
-      if (userTarget.id == SourceId) return response.status(StatusCode.ClientErrorBadRequest).json({ message: "You cannot add yourself" });
-      if (await this.service.CheckIfItAlreadyExists(SourceId, userTarget.id)) return response.status(StatusCode.ClientErrorConflict).json({ message: "Already exists" });
-      this.service.CreateFriendshipRequest(Number(SourceId), userTarget.id);
-      return response.status(StatusCode.SuccessOK).send();
-    } catch (error: any) {
-      return response.status(StatusCode.ClientErrorBadRequest).json({ message: error.message });
-    }
-  }
+	routers = (): Router => {
+		const router: Router = Router()
+		router.post("/", this.findAllByProfile)
+		router.post("/add", this.create)
+		router.post("/ReactToFriendRequest", this.reactToFriendRequest)
+		router.post("/RemoveFriend", this.removeFriend)
+		return router
+	}
 
-  async FindAllByUser(request: Request, response: Response): Promise<Response> {
-    try {
-      const { UserId } = request.body as FindAllByUserBodyRequest;
-      return response.status(StatusCode.SuccessOK).send(await this.service.FindAllByUser(Number(UserId)));
-    } catch (error: any) {
-      return response.status(StatusCode.ClientErrorBadRequest).json({ message: error.message });
-    }
-  }
+	create = async (request: Request, response: Response): Promise<Response> => {
+		const { ProfileTargetName, ProfileSourceId } = request.body as ICreateBodyRequest
+		const profileTarget = await AppDataSource.getRepository(Profile)
+			.createQueryBuilder("profile")
+			.where("LOWER(Nickname) = :nickname", { nickname: ProfileTargetName.toLowerCase() })
+			.getOne()
+		if (!profileTarget) throw new Error("Profile not found")
+		if (profileTarget.id === Number(ProfileSourceId)) return response.status(StatusCode.ClientErrorBadRequest).json({ message: "You cannot add yourself" })
 
-  async ReactToFriendRequest(request: Request, response: Response): Promise<Response> {
-    try {
-      const { FriendshipId, React, UserId } = request.body as ReactToFriendRequestBodyRequest;
-      return response.status(StatusCode.SuccessOK).send(await this.service.ReactToFriendRequest(React, Number(UserId), Number(FriendshipId)));
-    } catch (error: any) {
-      return response.status(StatusCode.ClientErrorBadRequest).json({ message: error.message });
-    }
-  }
+		const friendship = await this.service.findOneByProfilesId(ProfileSourceId, profileTarget.id)
+		if (friendship !== null)
+			if (friendship.Type === TypeOfFriendship.Removed) return response.status(StatusCode.SuccessNoContent).send(await this.service.updateTypeFriendship(friendship, TypeOfFriendship.Requested))
+			else return response.status(StatusCode.ClientErrorConflict).json({ message: "Already exists" })
+		else
+			return response.status(StatusCode.SuccessNoContent).send(await this.service.createFriendshipRequest(Number(ProfileSourceId), profileTarget.id))
+	}
 
-  /*  async FindOneById(request: Request, response: Response): Promise<Response> {
-    try {
-      const { id } = request.params;
-      return response.status(StatusCode.SuccessOK).send(await this.service.FindOneById(Number(id)));
-    } catch (error: any) {
-      return response.status(StatusCode.ClientErrorBadRequest).json({ message: error.message });
-    }
-  }
+	findAllByProfile = async (request: Request, response: Response): Promise<Response> => {
+		const { ProfileId } = request.body as IFindAllByUserBodyRequest
+		return response.status(StatusCode.SuccessOK).send(await this.service.findAllByProfile(Number(ProfileId)))
+	}
 
-  // async Create(request: Request, response: Response): Promise<Response> {
-  //   try {
-  //     const model = request.body;
-  //     return response.status(StatusCode.SuccessOK).send(await this.service.Create(model));
-  //   } catch (error: any) {
-  //     return response.status(StatusCode.ClientErrorBadRequest).json({ message: error.message });
-  //   }
-  // }
+	reactToFriendRequest = async (request: Request, response: Response): Promise<Response> => {
+		const { FriendshipId, React, ProfileId } = request.body as IReactToFriendRequestBodyRequest
+		return response.status(StatusCode.SuccessOK).send(await this.service.reactToFriendRequest(React, Number(ProfileId), Number(FriendshipId)))
+	}
 
-  async Update(request: Request, response: Response): Promise<Response> {
-    try {
-      const { id } = request.params;
-      const model = request.body;
-      return response.status(StatusCode.SuccessOK).send(await this.service.Update(Number(id), model));
-    } catch (error: any) {
-      return response.status(StatusCode.ClientErrorBadRequest).json({ message: error.message });
-    }
-  }
-
-  async Delete(request: Request, response: Response): Promise<Response> {
-    try {
-      const { id } = request.params;
-      return response.status(StatusCode.SuccessOK).send(await this.service.Delete(Number(id)));
-    } catch (error: any) {
-      return response.status(StatusCode.ClientErrorBadRequest).json({ message: error.message });
-    }
-  }*/
+	removeFriend = async (request: Request, response: Response): Promise<Response> => {
+		const { IdFriendship } = request.body
+		return response.status(StatusCode.SuccessOK).send(await this.service.remove(IdFriendship))
+	}
 }

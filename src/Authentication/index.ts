@@ -1,8 +1,8 @@
-import { userService } from "../User";
-import AuthenticationController from "./authentication.controller";
-import AuthenticationService from "./authentication.service";
+import { userService } from "User"
+import AuthenticationController, { IAuthenticationController } from "./authentication.controller"
+import AuthenticationService, { IAuthenticationService } from "./authentication.service"
 
-const authenticationService: AuthenticationService = new AuthenticationService(userService);
-const authenticationController: AuthenticationController = new AuthenticationController(authenticationService);
+const authenticationService: IAuthenticationService = new AuthenticationService(userService)
+const authenticationController: IAuthenticationController = new AuthenticationController(authenticationService)
 
-export { authenticationService, authenticationController };
+export { authenticationService, authenticationController }
