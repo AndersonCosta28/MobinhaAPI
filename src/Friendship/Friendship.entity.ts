@@ -7,10 +7,10 @@ export default class Friendship {
 	@PrimaryGeneratedColumn()
 		id: number
 
-	@ManyToOne(() => Profile, (profile) => profile.id, { eager: true })
+	@ManyToOne(() => Profile, (profile) => profile.Id, { eager: true })
 		Source: Profile
 
-	@ManyToOne(() => Profile, (profile) => profile.id, { eager: true })
+	@ManyToOne(() => Profile, (profile) => profile.Id, { eager: true })
 		Target: Profile
 
 	@Column({ type: "enum", enum: TypeOfFriendship, default: TypeOfFriendship.Requested })

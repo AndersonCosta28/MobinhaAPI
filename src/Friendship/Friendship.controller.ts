@@ -31,14 +31,14 @@ export default class FriendshipController implements IFriendshipController {
 			.where("LOWER(Nickname) = :nickname", { nickname: ProfileTargetName.toLowerCase() })
 			.getOne()
 		if (!profileTarget) throw new Error("Profile not found")
-		if (profileTarget.id === Number(ProfileSourceId)) return response.status(StatusCode.ClientErrorBadRequest).json({ message: "You cannot add yourself" })
+		if (profileTarget.Id === Number(ProfileSourceId)) return response.status(StatusCode.ClientErrorBadRequest).json({ message: "You cannot add yourself" })
 
-		const friendship = await this.service.findOneByProfilesId(ProfileSourceId, profileTarget.id)
+		const friendship = await this.service.findOneByProfilesId(ProfileSourceId, profileTarget.Id)
 		if (friendship !== null)
 			if (friendship.Type === TypeOfFriendship.Removed) return response.status(StatusCode.SuccessNoContent).send(await this.service.updateTypeFriendship(friendship, TypeOfFriendship.Requested))
 			else return response.status(StatusCode.ClientErrorConflict).json({ message: "Already exists" })
 		else
-			return response.status(StatusCode.SuccessNoContent).send(await this.service.createFriendshipRequest(Number(ProfileSourceId), profileTarget.id))
+			return response.status(StatusCode.SuccessNoContent).send(await this.service.createFriendshipRequest(Number(ProfileSourceId), profileTarget.Id))
 	}
 
 	findAllByProfile = async (request: Request, response: Response): Promise<Response> => {

@@ -29,7 +29,7 @@ export interface IMessage {
   FromId: number
   ToId: number
   Message: string
-  id: number
+  Id: number
 }
 
 export interface IFriend {

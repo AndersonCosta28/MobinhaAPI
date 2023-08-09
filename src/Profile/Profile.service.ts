@@ -12,7 +12,7 @@ export default class ProfileService implements IProfileService {
 	constructor(private readonly repository: Repository<Profile>) { }
 
 	findOneById = async (id: number): Promise<Profile> => {
-		const profile: Profile | null = await this.repository.findOne({ where: { id } })
+		const profile: Profile | null = await this.repository.findOne({ where: { Id: id } })
 		if (!profile) throw new Error("Profile not found")
 		return profile
 	}

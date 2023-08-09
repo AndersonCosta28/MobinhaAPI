@@ -32,6 +32,6 @@ export default class AuthenticationService implements IAuthenticationService {
 
 		// const token = jwt.sign({ login: user.Login, id: user.id }, secret)
 		const token = uuid4()
-		return { code: StatusCode.SuccessAccepted, idUser: user.id, idProfile: user.Profile.id, message: "Successfully authenticated user", token, nickname: user.Login }		
+		return { code: StatusCode.SuccessAccepted, idUser: user.id, idProfile: user.Profile.Id, message: "Successfully authenticated user", token, nickname: user.Login }		
 	}
 }

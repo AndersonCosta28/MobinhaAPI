@@ -21,23 +21,23 @@ export default class FriendshipService implements IFriendshipService {
 		const friendships: Friendship[] = await this.repository.find({
 			select: {
 				Source: {
-					id: true,
+					Id: true,
 					Nickname: true,
 				},
 				Target: {
-					id: true,
+					Id: true,
 					Nickname: true,
 				},
 			},
-			where: [{ Source: { id: idProfile } }, { Target: { id: idProfile } }],
+			where: [{ Source: { Id: idProfile } }, { Target: { Id: idProfile } }],
 		})
 
 		for (const friendship of friendships) {
-			const friendProfile = friendship.Source.id === idProfile ? friendship.Target : friendship.Source
+			const friendProfile = friendship.Source.Id === idProfile ? friendship.Target : friendship.Source
 			friendList.push({
 				FriendshipId: friendship.id,
 				Type: friendship.Type,
-				FriendshipRequestType: friendship.Source.id === idProfile ? FriendshipRequestType.Sent : FriendshipRequestType.Received,
+				FriendshipRequestType: friendship.Source.Id === idProfile ? FriendshipRequestType.Sent : FriendshipRequestType.Received,
 				FriendProfile: {
 					...friendProfile,
 					Description: friendProfile.Description ?? "",
@@ -50,8 +50,8 @@ export default class FriendshipService implements IFriendshipService {
 
 	createFriendshipRequest = async (userSource: number, userTarget: number): Promise<void> => {
 		const friendShip: Friendship = this.repository.create({
-			Source: { id: userSource },
-			Target: { id: userTarget },
+			Source: { Id: userSource },
+			Target: { Id: userTarget },
 			Type: TypeOfFriendship.Requested,
 		})
 		await this.repository.save(friendShip)
@@ -65,7 +65,7 @@ export default class FriendshipService implements IFriendshipService {
 
 	reactToFriendRequest = async (react: boolean, ProfileId: number, friendShipId: number): Promise<void> => {
 		const friendship = await this.findOneById(friendShipId)
-		if (friendship.Target.id !== ProfileId) throw new CustomErrorAPI("Only the recipient can react to the request")
+		if (friendship.Target.Id !== ProfileId && react) throw new CustomErrorAPI("Only the recipient can react to the request")
 		if (react) await this.updateTypeFriendship(friendship, TypeOfFriendship.Friend)
 		else await this.repository.delete(friendShipId)
 	}
@@ -83,8 +83,8 @@ export default class FriendshipService implements IFriendshipService {
 
 	findOneByProfilesId = async (idSource: number, idTarget: number): Promise<Friendship | null> => {
 		const friendship: Friendship | null = await this.repository.findOneBy([
-			{ Source: { id: idSource }, Target: { id: idTarget } },
-			{ Source: { id: idTarget }, Target: { id: idSource } },
+			{ Source: { Id: idSource }, Target: { Id: idTarget } },
+			{ Source: { Id: idTarget }, Target: { Id: idSource } },
 		])
 		return friendship
 	}
